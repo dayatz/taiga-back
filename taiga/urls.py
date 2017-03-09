@@ -80,3 +80,5 @@ if settings.DEBUG:
     # Hardcoded only for development server
     urlpatterns += staticfiles_urlpatterns(prefix="/static/")
     urlpatterns += mediafiles_urlpatterns(prefix="/media/")
+
+

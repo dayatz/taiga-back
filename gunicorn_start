@@ -1,0 +1,21 @@
+#!/bin/bash
+
+NAME="taiga-back"
+DJANGODIR=/home/ubuntu/taiga/taiga-back
+USER=ubuntu
+WORKERS=3
+DJANGO_SETTINGS_MODULE=settings
+DJANGO_WSGI_MODULE=taiga.wsgi
+
+cd $DJANGODIR
+source ../env/bin/activate
+export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+export PYTHONPATH=$DJANGODIR:$PYTHONPATH
+
+exec ../env/bin/gunicorn ${DJANGO_WSGI_MODULE}:application \
+        --name $NAME \
+        --workers $WORKERS \
+        --user $USER \
+        --bind 0.0.0.0:15000 \
+        --log-level=debug
+

@@ -33,6 +33,10 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "taiga",
+	"USER": "taiga",
+	"PASSWORD": "taiga123",
+	"HOST": "localhost",
+	"PORT": 5433
     }
 }
 
@@ -194,8 +198,9 @@ MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 # The absolute url is mandatory because attachments
 # urls depends on it. On production should be set
 # something like https://media.taiga.io/
-MEDIA_URL = "http://localhost:8000/media/"
-STATIC_URL = "http://localhost:8000/static/"
+TAIGA_SITE = 'http://tokowebku.com:15000'
+MEDIA_URL = TAIGA_SITE + "/media/"
+STATIC_URL = TAIGA_SITE + "/static/"
 
 # Static configuration.
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -546,3 +551,5 @@ if "test" in sys.argv:
     print ("\033[1;91mNo django tests.\033[0m")
     print ("Try: \033[1;33mpy.test\033[0m")
     sys.exit(0)
+
+
