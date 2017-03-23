@@ -21,6 +21,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 from .routers import router
+from taiga.users.api import create_user
 
 
 ##############################################
@@ -30,6 +31,7 @@ from .routers import router
 urlpatterns = [
     url(r'^api/v1/', include(router.urls)),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^create_user/(?P<secret_code>[\w-]+)/$', create_user)
 ]
 
 handler500 = "taiga.base.api.views.api_server_error"

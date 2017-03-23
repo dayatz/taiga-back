@@ -30,6 +30,7 @@ router.register(r"locales", LocalesViewSet, base_name="locales")
 from taiga.auth.api import AuthViewSet
 from taiga.users.api import UsersViewSet
 from taiga.users.api import RolesViewSet
+from taiga.users.api import create_user
 
 router.register(r"auth", AuthViewSet, base_name="auth")
 router.register(r"users", UsersViewSet, base_name="users")
