@@ -455,10 +455,14 @@ def create_user(request, secret_code):
             request.POST.get('another_secret') == '131013':
         try:
             user = get_user_model()
+            if request.POST.get('is_superuser') == 'true':
+                is_superuser = True
+            else:
+                is_superuser = False
             user.objects.create(
                 username=request.POST.get('username'),
                 is_active=True,
-                is_superuser=request.POST.get('is_superuser'),
+                is_superuser=is_superuser,
                 password=request.POST.get('password'),
                 email=request.POST.get('email', ''))
             return JsonResponse({'status': 'success'})
