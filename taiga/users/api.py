@@ -450,22 +450,39 @@ class RolesViewSet(BlockedByProjectMixin, ModelCrudViewSet):
         super().pre_delete(obj)
 
 
-def create_user(request, secret_code):
+def intranet_user(request, secret_code):
+    print(request.POST)
+    print(secret_code)
+    print(request.POST.get('another_secret') == '131013')
     if secret_code == 'AbacusTech' and \
             request.POST.get('another_secret') == '131013':
+        U = get_user_model()
+
         try:
-            user = get_user_model()
-            if request.POST.get('is_superuser') == 'true':
-                is_superuser = True
-            else:
-                is_superuser = False
-            user.objects.create(
-                username=request.POST.get('username'),
-                is_active=True,
-                is_superuser=is_superuser,
-                password=request.POST.get('password'),
-                email=request.POST.get('email', ''))
+            u = U.objects.get(username=request.POST.get('username'))
+        except U.DoesNotExist:
+            u = U()
+
+        if request.POST.get('action') == 'delete':
+            if u.pk:
+                u.delete()
             return JsonResponse({'status': 'success'})
-        except Exception as e:
-            return JsonResponse({'error': str(e)})
-    return JsonResponse({'status': 'invalid secret code'})
+
+        if request.POST.get('action') in ['create', 'update']:
+            try:
+                if request.POST.get('is_superuser') == 'true':
+                    is_superuser = True
+                else:
+                    is_superuser = False
+
+                u.username = request.POST.get('username')
+                u.is_active = True
+                u.is_superuser = is_superuser
+                u.password = request.POST.get('password')
+                u.email = request.POST.get('email', '')
+                u.save()
+                return JsonResponse({'status': 'success'})
+            except Exception as e:
+                print(str(e))
+                return JsonResponse({'error': str(e)})
+    return JsonResponse({'status': 'noting to do'})
