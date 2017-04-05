@@ -36,7 +36,7 @@ DATABASES = {
 	"USER": "taiga",
 	"PASSWORD": "taiga123",
 	"HOST": "localhost",
-	"PORT": 5433
+	"PORT": 5432
     }
 }
 
@@ -540,6 +540,8 @@ MAX_MEMBERSHIPS_PRIVATE_PROJECTS = None # None == no limit
 MAX_MEMBERSHIPS_PUBLIC_PROJECTS = None # None == no limit
 
 MAX_PENDING_MEMBERSHIPS = 30 # Max number of unconfirmed memberships in a project
+
+INTRANET_TAIGA_USER_URL = 'ec2-54-201-41-149.us-west-2.compute.amazonaws.com:8080/taiga_user/user/AbacusTech/'
 
 from .sr import *
 

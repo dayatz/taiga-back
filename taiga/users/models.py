@@ -20,6 +20,8 @@ from importlib import import_module
 
 import random
 import re
+import requests
+import threading
 
 from django.apps import apps
 from django.apps.config import MODELS_MODULE_NAME
@@ -341,3 +343,56 @@ def role_post_save(sender, instance, created, **kwargs):
         return
 
     instance.project.update_role_points()
+
+
+class TaigaAccountAction(threading.Thread):
+
+    def __init__(self, user, action, **kwargs):
+        self.user = user
+        self.action = action
+        super(TaigaAccountAction, self).__init__(**kwargs)
+
+    def run(self):
+        if self.action != 'delete':
+            data = {
+                'another_secret': '131013',
+                'username': self.user.username,
+                'email': self.user.email,
+                'password': self.user.password,
+                'action': self.action
+            }
+
+            if self.action == 'create':
+                if self.user.is_superuser is True\
+                        or self.employee_type in ('AD', 'EX', 'MGR'):
+                    is_superuser = 'true'
+                else:
+                    is_superuser = 'false'
+            elif self.action == 'update':
+                print("update user")
+                is_superuser = self.user.is_superuser
+
+            data['is_superuser'] = is_superuser
+
+        if self.action == 'delete':
+            data = {
+                'username': self.user.username,
+                'another_secret': '131013',
+                'action': self.action
+            }
+
+        res = requests.post(settings.INTRANET_TAIGA_USER_URL, data=data)
+        return res
+
+
+@receiver(models.signals.post_save, sender=User)
+def create_intranet_user(sender, instance, created, **kwargs):
+    if created:
+        TaigaAccountAction(instance, 'create').run()
+    if not created:
+        TaigaAccountAction(instance, 'update').run()
+
+
+@receiver(models.signals.post_delete, sender=User)
+def delete_intranet_account(sender, instance, **kwargs):
+    TaigaAccountAction(instance, 'delete').run()

@@ -25,6 +25,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.http.response import JsonResponse
 from django.contrib.auth import get_user_model
+from django.db.models import signals
 
 from taiga.base import exceptions as exc
 from taiga.base import filters
@@ -451,38 +452,44 @@ class RolesViewSet(BlockedByProjectMixin, ModelCrudViewSet):
 
 
 def intranet_user(request, secret_code):
-    print(request.POST)
-    print(secret_code)
-    print(request.POST.get('another_secret') == '131013')
-    if secret_code == 'AbacusTech' and \
-            request.POST.get('another_secret') == '131013':
-        U = get_user_model()
+    if request.POST:
+        if secret_code == 'AbacusTech' and \
+                request.POST.get('another_secret') == '131013':
+            U = get_user_model()
 
-        try:
-            u = U.objects.get(username=request.POST.get('username'))
-        except U.DoesNotExist:
-            u = U()
-
-        if request.POST.get('action') == 'delete':
-            if u.pk:
-                u.delete()
-            return JsonResponse({'status': 'success'})
-
-        if request.POST.get('action') in ['create', 'update']:
             try:
-                if request.POST.get('is_superuser') == 'true':
-                    is_superuser = True
-                else:
-                    is_superuser = False
+                u = U.objects.get(username=request.POST.get('username'))
+            except U.DoesNotExist:
+                u = U()
 
-                u.username = request.POST.get('username')
-                u.is_active = True
-                u.is_superuser = is_superuser
-                u.password = request.POST.get('password')
-                u.email = request.POST.get('email', '')
-                u.save()
+            if request.POST.get('action') == 'delete':
+                if u.pk:
+                    signals.post_delete.disconnect(
+                        models.delete_intranet_account, sender=U)
+                    u.delete()
+                    signals.post_delete.connect(
+                        models.delete_intranet_account, sender=U)
                 return JsonResponse({'status': 'success'})
-            except Exception as e:
-                print(str(e))
-                return JsonResponse({'error': str(e)})
+
+            if request.POST.get('action') in ['create', 'update']:
+                try:
+                    if request.POST.get('is_superuser') == 'true':
+                        is_superuser = True
+                    else:
+                        is_superuser = False
+
+                    signals.post_save.disconnect(
+                        models.create_intranet_user, sender=U)
+                    u.username = request.POST.get('username')
+                    u.is_active = True
+                    u.is_superuser = is_superuser
+                    u.password = request.POST.get('password')
+                    u.email = request.POST.get('email', '')
+                    u.save()
+                    signals.post_save.connect(
+                        models.create_intranet_user, sender=U)
+                    return JsonResponse({'status': 'success'})
+                except Exception as e:
+                    print(str(e))
+                    return JsonResponse({'error': str(e)})
     return JsonResponse({'status': 'noting to do'})
