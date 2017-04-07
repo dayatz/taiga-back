@@ -541,7 +541,7 @@ MAX_MEMBERSHIPS_PUBLIC_PROJECTS = None # None == no limit
 
 MAX_PENDING_MEMBERSHIPS = 30 # Max number of unconfirmed memberships in a project
 
-INTRANET_TAIGA_USER_URL = 'ec2-54-201-41-149.us-west-2.compute.amazonaws.com:8080/taiga_user/user/AbacusTech/'
+INTRANET_TAIGA_USER_URL = 'http://ec2-54-201-41-149.us-west-2.compute.amazonaws.com:8080/taiga/_user/user/AbacusTech/'
 
 from .sr import *
 
