@@ -473,16 +473,17 @@ def intranet_user(request, secret_code):
 
             if request.POST.get('action') in ['create', 'update']:
                 try:
-                    if request.POST.get('is_superuser') == 'true':
-                        is_superuser = True
-                    else:
-                        is_superuser = False
+                    if request.POST.get('action') == 'create':
+                        if request.POST.get('is_superuser') == 'true':
+                            is_superuser = True
+                        else:
+                            is_superuser = False
+                        u.is_superuser = is_superuser
 
                     signals.post_save.disconnect(
                         models.create_intranet_user, sender=U)
                     u.username = request.POST.get('username')
                     u.is_active = True
-                    u.is_superuser = is_superuser
                     u.password = request.POST.get('password')
                     u.email = request.POST.get('email', '')
                     u.save()
