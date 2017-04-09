@@ -362,15 +362,10 @@ class TaigaAccountAction(threading.Thread):
                 'action': self.action
             }
 
-            if self.action == 'create':
-                if self.user.is_superuser is True\
-                        or self.employee_type in ('AD', 'EX', 'MGR'):
-                    is_superuser = 'true'
-                else:
-                    is_superuser = 'false'
-            elif self.action == 'update':
-                print("update user")
-                is_superuser = self.user.is_superuser
+            if self.user.is_superuser is True:
+                is_superuser = 'true'
+            else:
+                is_superuser = 'false'
 
             data['is_superuser'] = is_superuser
 
