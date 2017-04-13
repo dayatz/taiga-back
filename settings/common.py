@@ -32,7 +32,7 @@ DEBUG = False
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "taiga",
+        "NAME": "taiga2",
 	"USER": "taiga",
 	"PASSWORD": "taiga123",
 	"HOST": "localhost",
