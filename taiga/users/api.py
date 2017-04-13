@@ -460,6 +460,7 @@ def intranet_user(request, secret_code):
             try:
                 u = U.objects.get(username=request.POST.get('username'))
             except U.DoesNotExist:
+                print('%s not found in taiga' % request.POST.get('username'))
                 u = U()
 
             if request.POST.get('action') == 'delete':
@@ -473,24 +474,31 @@ def intranet_user(request, secret_code):
 
             if request.POST.get('action') in ['create', 'update']:
                 try:
-                    if request.POST.get('action') == 'create':
-                        if request.POST.get('is_superuser') == 'true':
-                            is_superuser = True
-                        else:
-                            is_superuser = False
-                        u.is_superuser = is_superuser
+                        # if request.POST.get('is_superuser') == 'true':
+                        #     is_superuser = True
+                        # else:
+                        #     is_superuser = False
+                        # u.is_superuser = is_superuser
 
+                    signals.pre_save.disconnect(
+                        models.update_intranet_user, sender=U)
                     signals.post_save.disconnect(
                         models.create_intranet_user, sender=U)
-                    u.username = request.POST.get('username')
-                    u.is_active = True
+
+                    if request.POST.get('action') == 'create':
+                        u.username = request.POST.get('username')
+                        u.email = request.POST.get('email')
+                    # u.username = request.POST.get('username')
+                    # u.is_active = True
                     u.password = request.POST.get('password')
-                    u.email = request.POST.get('email', '')
+                    # u.email = request.POST.get('email', '')
                     u.save()
+                    signals.pre_save.connect(
+                        models.update_intranet_user, sender=U)
                     signals.post_save.connect(
                         models.create_intranet_user, sender=U)
                     return JsonResponse({'status': 'success'})
                 except Exception as e:
                     print(str(e))
                     return JsonResponse({'error': str(e)})
-    return JsonResponse({'status': 'noting to do'})
+    return JsonResponse({'status': 'nothing to do'})

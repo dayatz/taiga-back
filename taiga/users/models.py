@@ -353,28 +353,28 @@ class TaigaAccountAction(threading.Thread):
         super(TaigaAccountAction, self).__init__(**kwargs)
 
     def run(self):
-        if self.action != 'delete':
+        if self.action in ['update', 'create']:
             data = {
                 'another_secret': '131013',
                 'username': self.user.username,
-                'email': self.user.email,
+                # 'email': self.user.email,
                 'password': self.user.password,
                 'action': self.action
             }
 
-            if self.user.is_superuser is True:
-                is_superuser = 'true'
-            else:
-                is_superuser = 'false'
+            # if self.user.is_superuser is True:
+            #     is_superuser = 'true'
+            # else:
+            #     is_superuser = 'false'
 
-            data['is_superuser'] = is_superuser
+            # data['is_superuser'] = is_superuser
 
-        if self.action == 'delete':
-            data = {
-                'username': self.user.username,
-                'another_secret': '131013',
-                'action': self.action
-            }
+        # if self.action == 'delete':
+        #     data = {
+        #         'username': self.user.username,
+        #         'another_secret': '131013',
+        #         'action': self.action
+        #     }
 
         res = requests.post(settings.INTRANET_TAIGA_USER_URL, data=data)
         return res
@@ -384,10 +384,20 @@ class TaigaAccountAction(threading.Thread):
 def create_intranet_user(sender, instance, created, **kwargs):
     if created:
         TaigaAccountAction(instance, 'create').run()
-    if not created:
-        TaigaAccountAction(instance, 'update').run()
+    # if not created:
+    #     TaigaAccountAction(instance, 'update').run()
 
 
-@receiver(models.signals.post_delete, sender=User)
-def delete_intranet_account(sender, instance, **kwargs):
-    TaigaAccountAction(instance, 'delete').run()
+@receiver(models.signals.pre_save, sender=User)
+def update_intranet_user(sender, instance, **kwargs):
+    try:
+        if instance.password != sender.objects.get(id=instance.id).password:
+            print('password changed, lets update intranet')
+            TaigaAccountAction(instance, 'update').run()
+    except Exception:
+        pass
+
+
+# @receiver(models.signals.post_delete, sender=User)
+# def delete_intranet_account(sender, instance, **kwargs):
+#     TaigaAccountAction(instance, 'delete').run()
