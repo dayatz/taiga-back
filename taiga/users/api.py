@@ -501,4 +501,4 @@ def intranet_user(request, secret_code):
         #         except Exception as e:
         #             print(str(e))
         #             return JsonResponse({'error': str(e)})
-    return JsonResponse({'status': 'nothing to do'})
+        return JsonResponse({'status': 'nothing to do'})
