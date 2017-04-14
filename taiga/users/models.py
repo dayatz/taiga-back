@@ -345,22 +345,22 @@ def role_post_save(sender, instance, created, **kwargs):
     instance.project.update_role_points()
 
 
-class TaigaAccountAction(threading.Thread):
+# class TaigaAccountAction(threading.Thread):
 
-    def __init__(self, user, action, **kwargs):
-        self.user = user
-        self.action = action
-        super(TaigaAccountAction, self).__init__(**kwargs)
+#     def __init__(self, user, action, **kwargs):
+#         self.user = user
+#         self.action = action
+#         super(TaigaAccountAction, self).__init__(**kwargs)
 
-    def run(self):
-        if self.action in ['update', 'create']:
-            data = {
-                'another_secret': '131013',
-                'username': self.user.username,
-                # 'email': self.user.email,
-                'password': self.user.password,
-                'action': self.action
-            }
+#     def run(self):
+#         if self.action in ['update', 'create']:
+#             data = {
+#                 'another_secret': '131013',
+#                 'username': self.user.username,
+#                 # 'email': self.user.email,
+#                 'password': self.user.password,
+#                 'action': self.action
+#             }
 
             # if self.user.is_superuser is True:
             #     is_superuser = 'true'
@@ -376,26 +376,26 @@ class TaigaAccountAction(threading.Thread):
         #         'action': self.action
         #     }
 
-        res = requests.post(settings.INTRANET_TAIGA_USER_URL, data=data)
-        return res
+        # res = requests.post(settings.INTRANET_TAIGA_USER_URL, data=data)
+        # return res
 
 
-@receiver(models.signals.post_save, sender=User)
-def create_intranet_user(sender, instance, created, **kwargs):
-    if created:
-        TaigaAccountAction(instance, 'create').run()
+# @receiver(models.signals.post_save, sender=User)
+# def create_intranet_user(sender, instance, created, **kwargs):
+#     if created:
+#         TaigaAccountAction(instance, 'create').run()
     # if not created:
     #     TaigaAccountAction(instance, 'update').run()
 
 
-@receiver(models.signals.pre_save, sender=User)
-def update_intranet_user(sender, instance, **kwargs):
-    try:
-        if instance.password != sender.objects.get(id=instance.id).password:
-            print('password changed, lets update intranet')
-            TaigaAccountAction(instance, 'update').run()
-    except Exception:
-        pass
+# @receiver(models.signals.pre_save, sender=User)
+# def update_intranet_user(sender, instance, **kwargs):
+#     try:
+#         if instance.password != sender.objects.get(id=instance.id).password:
+#             print('password changed, lets update intranet')
+#             TaigaAccountAction(instance, 'update').run()
+#     except Exception:
+#         pass
 
 
 # @receiver(models.signals.post_delete, sender=User)
