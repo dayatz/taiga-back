@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
-# Copyright (C) 2014-2016 Jesús Espino <jespinog@gmail.com>
-# Copyright (C) 2014-2016 David Barragán <bameda@dbarragan.com>
-# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2017 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2017 Jesús Espino <jespinog@gmail.com>
+# Copyright (C) 2014-2017 David Barragán <bameda@dbarragan.com>
+# Copyright (C) 2014-2017 Alejandro Alonso <alejandro.alonso@kaleidos.net>
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
@@ -323,26 +323,24 @@ def get_related_people(obj):
 
     :return: User queryset object representing the users related to the object.
     """
-    related_people_q = Q()
+
+    ## - Watchers
+    related_people_ids = list(get_watchers(obj).values_list('id', flat=True))
 
     ## - Owner
     if hasattr(obj, "owner_id") and obj.owner_id:
-        related_people_q.add(Q(id=obj.owner_id), Q.OR)
+        related_people_ids.append(obj.owner_id)
 
     ## - Assigned to
     if hasattr(obj, "assigned_to_id") and obj.assigned_to_id:
-        related_people_q.add(Q(id=obj.assigned_to_id), Q.OR)
-
-    ## - Watchers
-    related_people_q.add(_get_q_watchers(obj), Q.OR)
+        related_people_ids.append(obj.assigned_to_id)
 
     ## - Apply filters
-    related_people = get_user_model().objects.filter(related_people_q)
+    related_people = get_user_model().objects.filter(id__in=set(related_people_ids))
 
     ## - Exclude inactive and system users and remove duplicate
     related_people = related_people.exclude(is_active=False)
     related_people = related_people.exclude(is_system=True)
-    related_people = related_people.distinct()
 
     return related_people
 

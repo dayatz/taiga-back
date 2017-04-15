@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
-# Copyright (C) 2014-2016 Jesús Espino <jespinog@gmail.com>
-# Copyright (C) 2014-2016 David Barragán <bameda@dbarragan.com>
-# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2017 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2017 Jesús Espino <jespinog@gmail.com>
+# Copyright (C) 2014-2017 David Barragán <bameda@dbarragan.com>
+# Copyright (C) 2014-2017 Alejandro Alonso <alejandro.alonso@kaleidos.net>
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
@@ -28,8 +28,8 @@ class ResolverValidator(validators.Validator):
     us = serializers.IntegerField(required=False)
     task = serializers.IntegerField(required=False)
     issue = serializers.IntegerField(required=False)
-    ref = serializers.IntegerField(required=False)
     wikipage = serializers.CharField(max_length=512, required=False)
+    ref = serializers.CharField(max_length=512, required=False)
 
     def validate(self, attrs):
         if "ref" in attrs:
@@ -41,5 +41,7 @@ class ResolverValidator(validators.Validator):
                 raise ValidationError("'task' param is incompatible with 'ref' in the same request")
             if "issue" in attrs:
                 raise ValidationError("'issue' param is incompatible with 'ref' in the same request")
+            if "wikipage" in attrs:
+                raise ValidationError("'wikipage' param is incompatible with 'ref' in the same request")
 
         return attrs

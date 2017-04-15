@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2016 Jesús Espino <jespinog@gmail.com>
-# Copyright (C) 2014-2016 David Barragán <bameda@dbarragan.com>
-# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2017 Andrey Antukh <niwi@niwi.be>
+# Copyright (C) 2014-2017 Jesús Espino <jespinog@gmail.com>
+# Copyright (C) 2014-2017 David Barragán <bameda@dbarragan.com>
+# Copyright (C) 2014-2017 Alejandro Alonso <alejandro.alonso@kaleidos.net>
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
@@ -26,11 +26,33 @@ from taiga.base.utils.urls import get_absolute_url
 from easy_thumbnails.files import get_thumbnailer
 from easy_thumbnails.exceptions import InvalidImageFormatError
 from PIL import Image
+from PIL.PngImagePlugin import PngImageFile
 
+from io import BytesIO
 
+# SVG thumbnail generator
+try:
+    from cairosvg.surface import PNGSurface
+    import magic
+
+    def svg_image_factory(fp, filename):
+        mime_type = magic.from_buffer(fp.read(1024), mime=True)
+        if mime_type != "image/svg+xml":
+            raise TypeError
+
+        fp.seek(0)
+        png_data = PNGSurface.convert(fp.read())
+        return PngImageFile(BytesIO(png_data))
+
+    Image.register_mime("SVG", "image/svg+xml")
+    Image.register_extension("SVG", ".svg")
+    Image.register_open("SVG", svg_image_factory)
+except Exception:
+    pass
+
+# PSD thumbnail generator
 def psd_image_factory(data, *args):
     return PSDImage.from_stream(data).as_PIL()
-
 
 Image.init()
 Image.register_open("PSD", psd_image_factory)
