@@ -77,6 +77,7 @@ class UserSerializer(serializers.LightSerializer):
 class UserAdminSerializer(UserSerializer):
     total_private_projects = MethodField()
     total_public_projects = MethodField()
+    is_superuser = MethodField()
     email = Field()
     max_private_projects = Field()
     max_public_projects = Field()
@@ -88,6 +89,9 @@ class UserAdminSerializer(UserSerializer):
 
     def get_total_public_projects(self, user):
         return user.owned_projects.filter(is_private=False).count()
+
+    def get_is_superuser(self, user):
+        return user.is_superuser
 
 
 class UserBasicInfoSerializer(serializers.LightSerializer):
